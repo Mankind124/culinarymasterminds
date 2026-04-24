@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Login — Culinary Masterminds</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23b8736f'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' fill='%23fffaf3' text-anchor='middle'%3ECM%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<div class="admin-login">
+  <div class="admin-login-card">
+    <div class="brand-mark">CM</div>
+    <h1>Admin Sign-in</h1>
+    <p>Culinary Masterminds bookings dashboard</p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">Sign in</button>
+      <div class="form-status" id="loginStatus" role="status" aria-live="polite" style="margin-top: 1rem;"></div>
+    </form>
+
+    <p style="margin-top: 1.5rem; font-size: .8rem; color: var(--muted);">
+      <a href="/" style="color: var(--rose-deep);">← Back to site</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const form = document.getElementById('loginForm');
+    const status = document.getElementById('loginStatus');
+    const btn = document.getElementById('loginBtn');
+    const pw = document.getElementById('password');
+
+    function setStatus(kind, msg) {
+      status.className = 'form-status ' + kind;
+      status.textContent = msg;
+    }
+
+    // Already logged in? Bounce to dashboard.
+    fetch('/api/admin/session').then(r => { if (r.ok) location.href = '/admin/dashboard.html'; });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = pw.value;
+      if (!password) { pw.focus(); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      setStatus('info', '');
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const out = await res.json().catch(() => ({}));
+        if (res.ok && out.ok) {
+          location.href = '/admin/dashboard.html';
+          return;
+        }
+        setStatus('error', out.error || 'Could not sign in.');
+      } catch {
+        setStatus('error', 'Network error. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    });
+  })();
+</script>
+</body>
+</html>

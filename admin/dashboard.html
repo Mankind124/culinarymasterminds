@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bookings Dashboard — Culinary Masterminds</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23b8736f'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' fill='%23fffaf3' text-anchor='middle'%3ECM%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1>CM · Bookings</h1>
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <a href="/" style="color:rgba(255,250,243,0.7); font-size:.85rem;">View site →</a>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="admin-stats" id="stats">
+      <div class="stat"><div class="label">New</div><div class="value" id="stat-new">—</div></div>
+      <div class="stat"><div class="label">Contacted</div><div class="value" id="stat-contacted">—</div></div>
+      <div class="stat"><div class="label">Confirmed</div><div class="value" id="stat-confirmed">—</div></div>
+      <div class="stat"><div class="label">Total</div><div class="value" id="stat-total">—</div></div>
+    </div>
+
+    <div class="admin-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <h2>Booking Requests</h2>
+        <div style="display:flex; gap:.5rem;">
+          <select id="filterStatus">
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="archived">Archived</option>
+          </select>
+          <button class="btn btn-primary" style="padding: .5rem 1rem; font-size: .85rem;" id="refreshBtn">Refresh</button>
+        </div>
+      </div>
+
+      <div id="tableWrap" style="margin-top: 1.5rem; overflow-x: auto;">
+        <p class="empty-state">Loading bookings...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  const tableWrap = document.getElementById('tableWrap');
+  const filter = document.getElementById('filterStatus');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  let bookings = [];
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    } catch { return iso; }
+  }
+
+  function render() {
+    const f = filter.value;
+    const rows = bookings.filter(b => !f || b.status === f);
+
+    // Update stats from full set
+    document.getElementById('stat-new').textContent = bookings.filter(b => b.status === 'new').length;
+    document.getElementById('stat-contacted').textContent = bookings.filter(b => b.status === 'contacted').length;
+    document.getElementById('stat-confirmed').textContent = bookings.filter(b => b.status === 'confirmed').length;
+    document.getElementById('stat-total').textContent = bookings.length;
+
+    if (!rows.length) {
+      tableWrap.innerHTML = '<p class="empty-state">No bookings to show.</p>';
+      return;
+    }
+
+    let html = `<table class="admin-table">
+      <thead><tr>
+        <th>Received</th><th>Name / Contact</th><th>Event</th><th>Details</th><th>Message</th><th>Status</th><th></th>
+      </tr></thead><tbody>`;
+
+    for (const b of rows) {
+      const phone = b.phone ? `<br/><a href="tel:${escapeHtml(b.phone)}" style="font-size:.85rem;">${escapeHtml(b.phone)}</a>` : '';
+      html += `<tr data-id="${b.id}">
+        <td style="white-space:nowrap; font-size:.85rem; color: var(--muted);">${fmtDate(b.created_at)}</td>
+        <td><strong>${escapeHtml(b.name)}</strong><br/><a href="mailto:${escapeHtml(b.email)}" style="font-size:.85rem;">${escapeHtml(b.email)}</a>${phone}</td>
+        <td><strong>${escapeHtml(b.event_type)}</strong>${b.event_date ? '<br/><span style="font-size:.85rem;">' + escapeHtml(b.event_date) + '</span>' : ''}</td>
+        <td style="font-size:.85rem;">${b.guests ? '<strong>' + escapeHtml(b.guests) + '</strong> guests<br/>' : ''}${escapeHtml(b.location || '')}</td>
+        <td style="max-width: 320px; font-size: .9rem; white-space: pre-wrap;">${escapeHtml(b.message)}</td>
+        <td><span class="badge badge-${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></td>
+        <td>
+          <div class="admin-actions">
+            <select class="status-select">
+              <option value="new" ${b.status==='new'?'selected':''}>New</option>
+              <option value="contacted" ${b.status==='contacted'?'selected':''}>Contacted</option>
+              <option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option>
+              <option value="archived" ${b.status==='archived'?'selected':''}>Archived</option>
+            </select>
+            <button class="delete-btn" title="Delete">×</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    tableWrap.innerHTML = html;
+
+    tableWrap.querySelectorAll('tr[data-id]').forEach(row => {
+      const id = row.getAttribute('data-id');
+      row.querySelector('.status-select').addEventListener('change', async (e) => {
+        const newStatus = e.target.value;
+        const res = await fetch(`/api/admin/bookings?id=${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+          const idx = bookings.findIndex(b => String(b.id) === String(id));
+          if (idx !== -1) { bookings[idx].status = newStatus; render(); }
+        } else {
+          alert('Could not update status.');
+        }
+      });
+      row.querySelector('.delete-btn').addEventListener('click', async () => {
+        if (!confirm('Delete this booking? This cannot be undone.')) return;
+        const res = await fetch(`/api/admin/bookings?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          bookings = bookings.filter(b => String(b.id) !== String(id));
+          render();
+        } else {
+          alert('Could not delete booking.');
+        }
+      });
+    });
+  }
+
+  async function load() {
+    tableWrap.innerHTML = '<p class="empty-state">Loading...</p>';
+    try {
+      const res = await fetch('/api/admin/bookings');
+      if (res.status === 401) { location.href = '/admin/'; return; }
+      const out = await res.json();
+      if (out.ok) {
+        bookings = out.bookings || [];
+        render();
+      } else {
+        tableWrap.innerHTML = '<p class="empty-state">Could not load bookings.</p>';
+      }
+    } catch {
+      tableWrap.innerHTML = '<p class="empty-state">Network error.</p>';
+    }
+  }
+
+  filter.addEventListener('change', render);
+  refreshBtn.addEventListener('click', load);
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.href = '/admin/';
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

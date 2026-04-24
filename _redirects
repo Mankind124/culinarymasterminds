@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects
+# /admin -> /admin/  (so the trailing-slashed dir-index serves)
+/admin /admin/ 301
