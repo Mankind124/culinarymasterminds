@@ -110,6 +110,42 @@ p { color: var(--muted); }
 }
 .btn-gold:hover { background: var(--gold-deep); color: var(--ivory); }
 
+/* ───── Promo banner (hidden by default; content-loader toggles) ───── */
+.promo-banner {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 101;
+  background: var(--rose-deep);
+  color: var(--ivory);
+  text-align: center;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.promo-banner .promo-text { margin-right: 0.5rem; }
+.promo-banner .promo-cta {
+  color: var(--ivory);
+  text-decoration: underline;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+.promo-banner .promo-cta:hover { opacity: 0.85; }
+
+/* When banner is visible, push header + page content down */
+body.has-promo .site-header { top: 42px; }
+body.has-promo .hero { padding-top: 42px; }
+body.has-promo .page-hero { padding-top: calc(8rem + 42px); }
+
+@media (max-width: 640px) {
+  .promo-banner { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+  body.has-promo .site-header { top: 60px; }
+  body.has-promo .hero { padding-top: 60px; }
+  body.has-promo .page-hero { padding-top: calc(8rem + 60px); }
+}
+
 /* ───── Header / Nav ───── */
 .site-header {
   position: fixed;

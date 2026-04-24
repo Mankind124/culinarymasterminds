@@ -28,6 +28,7 @@
     <a href="/admin/settings.html" class="active">Settings</a>
     <a href="/admin/testimonials.html">Testimonials</a>
     <a href="/admin/gallery.html">Gallery</a>
+    <a href="/admin/menu.html">Menu</a>
   </nav>
 
   <main class="admin-main">
@@ -76,11 +77,19 @@
     let html = '';
     for (const it of items) {
       const value = it.value || '';
-      const inputType = it.type === 'email' ? 'email' : it.type === 'url' ? 'url' : 'text';
-      html += `<div class="field-row">
-        <label for="f-${escapeAttr(it.key)}">${escapeAttr(it.label)}<div class="field-help">Default: ${escapeAttr(it.default || '(none)')}</div></label>
-        <input id="f-${escapeAttr(it.key)}" name="${escapeAttr(it.key)}" type="${inputType}" value="${escapeAttr(value)}" placeholder="${escapeAttr(it.default || '')}" />
-      </div>`;
+      if (it.type === 'toggle') {
+        const checked = value ? 'checked' : '';
+        html += `<div class="field-row">
+          <label for="f-${escapeAttr(it.key)}">${escapeAttr(it.label)}<div class="field-help">Turn on to show on the public site.</div></label>
+          <div><label style="display:inline-flex; align-items:center; gap:.5rem; font-weight:400; font-size:.95rem; color: var(--ink); text-transform: none; letter-spacing: normal;"><input id="f-${escapeAttr(it.key)}" name="${escapeAttr(it.key)}" type="checkbox" ${checked} value="1" style="width:auto;" /> Active</label></div>
+        </div>`;
+      } else {
+        const inputType = it.type === 'email' ? 'email' : it.type === 'url' ? 'url' : 'text';
+        html += `<div class="field-row">
+          <label for="f-${escapeAttr(it.key)}">${escapeAttr(it.label)}<div class="field-help">Default: ${escapeAttr(it.default || '(none)')}</div></label>
+          <input id="f-${escapeAttr(it.key)}" name="${escapeAttr(it.key)}" type="${inputType}" value="${escapeAttr(value)}" placeholder="${escapeAttr(it.default || '')}" />
+        </div>`;
+      }
     }
     fieldsEl.innerHTML = html;
   }
@@ -94,7 +103,9 @@
     const values = {};
     for (const it of items) {
       const el = document.getElementById('f-' + it.key);
-      values[it.key] = el ? el.value : '';
+      if (!el) { values[it.key] = ''; continue; }
+      if (it.type === 'toggle') values[it.key] = el.checked ? '1' : '';
+      else values[it.key] = el.value;
     }
     try {
       const res = await fetch('/api/admin/settings', {

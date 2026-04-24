@@ -21,6 +21,12 @@ export const SETTINGS_SCHEMA = [
   { key: 'business_service_area',   label: 'Service area (short)', type: 'text',     default: 'Gastonia, Charlotte, Greensboro & surrounding NC' },
   { key: 'business_tagline',        label: 'Tagline',              type: 'text',     default: 'A taste of Nigeria in North Carolina' },
   { key: 'business_address',        label: 'Physical address (optional)', type: 'text', default: '' },
+
+  // Promo banner (top of every public page)
+  { key: 'promo_active',            label: 'Promo banner — show?',       type: 'toggle',   default: '' },
+  { key: 'promo_text',              label: 'Promo banner — text',        type: 'text',     default: '' },
+  { key: 'promo_cta_text',          label: 'Promo banner — button text', type: 'text',     default: '' },
+  { key: 'promo_cta_url',           label: 'Promo banner — button URL',  type: 'url',      default: '' },
 ];
 
 const VALID_KEYS = new Set(SETTINGS_SCHEMA.map((s) => s.key));

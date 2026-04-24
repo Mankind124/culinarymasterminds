@@ -40,6 +40,15 @@ import {
   onRequestPatch as adminGalleryPatch,
   onRequestDelete as adminGalleryDelete
 } from '../functions/api/admin/gallery.js';
+import {
+  getMenu as adminMenuGet,
+  createCategory as adminMenuCategoryCreate,
+  patchCategory as adminMenuCategoryPatch,
+  deleteCategory as adminMenuCategoryDelete,
+  createItem as adminMenuItemCreate,
+  patchItem as adminMenuItemPatch,
+  deleteItem as adminMenuItemDelete
+} from '../functions/api/admin/menu.js';
 
 const routes = [
   ['POST',    '/api/bookings',             bookingsPost],
@@ -69,6 +78,14 @@ const routes = [
   ['POST',    '/api/admin/gallery',        adminGalleryPost],
   ['PATCH',   '/api/admin/gallery',        adminGalleryPatch],
   ['DELETE',  '/api/admin/gallery',        adminGalleryDelete],
+
+  ['GET',     '/api/admin/menu',           adminMenuGet],
+  ['POST',    '/api/admin/menu/category',  adminMenuCategoryCreate],
+  ['PATCH',   '/api/admin/menu/category',  adminMenuCategoryPatch],
+  ['DELETE',  '/api/admin/menu/category',  adminMenuCategoryDelete],
+  ['POST',    '/api/admin/menu/item',      adminMenuItemCreate],
+  ['PATCH',   '/api/admin/menu/item',      adminMenuItemPatch],
+  ['DELETE',  '/api/admin/menu/item',      adminMenuItemDelete],
 ];
 
 const json = (data, status = 200) =>

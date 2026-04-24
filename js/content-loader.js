@@ -62,6 +62,50 @@
     if (a && t.author) a.textContent = '— ' + t.author;
   }
 
+  // Promo banner — show only if admin toggled it on AND has text
+  const promoActive = (all.promo_active || '').trim();
+  const promoText = (all.promo_text || '').trim();
+  if (promoActive && promoText) {
+    const banner = document.getElementById('promoBanner');
+    if (banner) {
+      const textEl = banner.querySelector('.promo-text');
+      const ctaEl = banner.querySelector('.promo-cta');
+      if (textEl) textEl.textContent = promoText;
+      const ctaText = (all.promo_cta_text || '').trim();
+      const ctaUrl = (all.promo_cta_url || '').trim();
+      if (ctaEl && ctaText && ctaUrl) {
+        ctaEl.textContent = ctaText;
+        ctaEl.setAttribute('href', ctaUrl);
+        ctaEl.style.display = '';
+      }
+      banner.style.display = '';
+      document.body.classList.add('has-promo');
+    }
+  }
+
+  // Menu — if admin has a menu defined, swap /services.html menu-categories
+  const menuContainer = document.querySelector('[data-cm-menu]');
+  if (menuContainer && Array.isArray(data.menu) && data.menu.length) {
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+    const html = data.menu.map((cat) => {
+      const items = cat.items.map((it) => `
+        <div class="menu-item"><div>
+          <div class="menu-item-name">${esc(it.name)}</div>
+          ${it.description ? `<p>${esc(it.description)}</p>` : ''}
+        </div></div>
+      `).join('');
+      return `<div class="menu-category reveal">
+        <h3>${esc(cat.name)}</h3>
+        ${items}
+      </div>`;
+    }).join('');
+    menuContainer.innerHTML = html;
+    // re-trigger reveal on newly inserted elements
+    menuContainer.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+  }
+
   // Gallery — if admin has uploaded any images, replace the static grid
   const galleryContainers = document.querySelectorAll('[data-cm-gallery]');
   if (galleryContainers.length && Array.isArray(data.gallery) && data.gallery.length) {

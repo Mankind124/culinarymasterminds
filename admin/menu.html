@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Menu — Culinary Masterminds Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23b8736f'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' fill='%23fffaf3' text-anchor='middle'%3ECM%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+<style>
+  .cat-card {
+    background: var(--ivory);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .cat-head {
+    background: var(--cream);
+    padding: .85rem 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto;
+    gap: .75rem;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .cat-head input.name {
+    background: transparent;
+    border: none;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    color: var(--charcoal);
+    padding: .25rem .5rem;
+    border-radius: 2px;
+  }
+  .cat-head input.name:focus { outline: none; background: var(--ivory); border: 1px solid var(--line); }
+  .cat-head .arrows, .cat-head .vis-wrap { display: flex; gap: .25rem; align-items: center; }
+  .cat-head button {
+    background: var(--charcoal);
+    color: var(--ivory);
+    border: none;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    font-size: .75rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .cat-head button.danger { background: transparent; color: #8b3a36; }
+  .cat-head button.danger:hover { background: transparent; color: #5d2622; }
+  .cat-head button:hover { background: var(--rose-deep); }
+  .cat-head label { font-size: .75rem; color: var(--muted); display: flex; align-items: center; gap: .35rem; cursor: pointer; }
+  .cat-head .arrows button { padding: .25rem .5rem; }
+
+  .item-list { padding: .5rem 1rem; }
+  .item-row {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr auto auto auto;
+    gap: .5rem;
+    padding: .5rem 0;
+    align-items: start;
+    border-bottom: 1px dashed var(--line);
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-row input, .item-row textarea {
+    background: var(--cream);
+    border: 1px solid var(--line);
+    padding: .4rem .55rem;
+    font-family: var(--sans);
+    font-size: .9rem;
+    border-radius: 2px;
+    width: 100%;
+  }
+  .item-row textarea { min-height: 40px; font-size: .85rem; resize: vertical; line-height: 1.4; }
+  .item-row input:focus, .item-row textarea:focus { outline: none; border-color: var(--rose-deep); background: var(--ivory); }
+  .item-row .idx { color: var(--muted); font-size: .8rem; padding: .5rem .25rem; }
+  .item-row button {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: .35rem .55rem;
+    cursor: pointer;
+    font-size: .75rem;
+    border-radius: 2px;
+  }
+  .item-row button:hover { background: var(--cream); }
+  .item-row button.danger { color: #8b3a36; border-color: transparent; }
+  .item-row button.danger:hover { background: transparent; color: #5d2622; }
+  .item-row .arrows { display: flex; gap: .2rem; }
+  .item-row .vis-wrap { display: flex; align-items: center; padding-top: .35rem; }
+
+  .add-item-row {
+    padding: .75rem 0 .5rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: .5rem;
+  }
+  .add-item-row input, .add-item-row textarea {
+    background: var(--ivory);
+    border: 1px solid var(--rose);
+    padding: .5rem .65rem;
+    border-radius: 2px;
+    font-size: .9rem;
+  }
+  .add-item-row button {
+    background: var(--rose-deep);
+    color: var(--ivory);
+    border: none;
+    padding: .5rem 1rem;
+    cursor: pointer;
+    font-size: .8rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .add-item-row button:hover { background: var(--charcoal); }
+
+  .add-cat {
+    display: flex;
+    gap: .5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--ivory);
+    border: 2px dashed var(--rose-soft);
+    border-radius: 4px;
+  }
+  .add-cat input {
+    flex: 1;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    padding: .55rem .75rem;
+    border-radius: 2px;
+  }
+  .add-cat button {
+    background: var(--rose-deep);
+    color: var(--ivory);
+    border: none;
+    padding: .55rem 1.25rem;
+    cursor: pointer;
+    font-size: .85rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .add-cat button:hover { background: var(--charcoal); }
+
+  @media (max-width: 720px) {
+    .cat-head { grid-template-columns: 1fr auto; row-gap: .5rem; }
+    .cat-head .arrows { grid-column: 1; }
+    .item-row { grid-template-columns: 1fr; gap: .35rem; }
+    .item-row .idx { padding: 0; }
+    .item-row .vis-wrap { padding-top: 0; }
+    .add-item-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1>CM · Admin</h1>
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <a href="/" style="color:rgba(255,250,243,0.7); font-size:.85rem;">View site →</a>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <nav class="admin-nav">
+    <a href="/admin/dashboard.html">Bookings</a>
+    <a href="/admin/content.html">Content</a>
+    <a href="/admin/settings.html">Settings</a>
+    <a href="/admin/testimonials.html">Testimonials</a>
+    <a href="/admin/gallery.html">Gallery</a>
+    <a href="/admin/menu.html" class="active">Menu</a>
+  </nav>
+
+  <main class="admin-main">
+    <div class="admin-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1rem;">
+        <div>
+          <h2>Menu</h2>
+          <p style="color: var(--muted); margin: .25rem 0 0; font-size: .9rem;">Edit dishes and categories shown on <a href="/services.html" target="_blank" style="color: var(--rose-deep); text-decoration: underline;">/services.html</a>. Rename on blur. Only visible items appear on the public site.</p>
+        </div>
+      </div>
+
+      <div id="menu">
+        <p class="empty-state">Loading...</p>
+      </div>
+
+      <div class="add-cat">
+        <input id="newCatName" type="text" placeholder="New category name (e.g. Vegan Options)" />
+        <button id="addCatBtn">+ Add category</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  const mount = document.getElementById('menu');
+  const newCatName = document.getElementById('newCatName');
+  const addCatBtn = document.getElementById('addCatBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  let categories = [];
+  let items = [];
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function load() {
+    const res = await fetch('/api/admin/menu');
+    if (res.status === 401) { location.href = '/admin/'; return; }
+    const out = await res.json();
+    if (!out.ok) { mount.innerHTML = '<p class="empty-state">Could not load menu.</p>'; return; }
+    categories = out.categories;
+    items = out.items;
+    render();
+  }
+
+  function render() {
+    if (!categories.length) {
+      mount.innerHTML = '<p class="empty-state">No categories yet. Add one below to get started.</p>';
+      return;
+    }
+    let html = '';
+    categories.forEach((cat, catIdx) => {
+      const catItems = items.filter((it) => it.category_id === cat.id);
+      html += `<div class="cat-card" data-cat-id="${cat.id}">
+        <div class="cat-head">
+          <div class="arrows">
+            <button class="cat-up" ${catIdx === 0 ? 'disabled style="opacity:.4;cursor:default;"' : ''}>↑</button>
+            <button class="cat-down" ${catIdx === categories.length - 1 ? 'disabled style="opacity:.4;cursor:default;"' : ''}>↓</button>
+          </div>
+          <input class="name" type="text" value="${esc(cat.name)}" />
+          <label class="vis-wrap"><input type="checkbox" class="cat-vis" ${cat.visible ? 'checked' : ''}/> Visible</label>
+          <button class="cat-save">Save name</button>
+          <button class="cat-delete danger" title="Delete category">Delete</button>
+        </div>
+        <div class="item-list">
+          ${catItems.map((it, itemIdx) => `
+            <div class="item-row" data-item-id="${it.id}">
+              <span class="idx">${itemIdx + 1}.</span>
+              <input class="item-name" type="text" value="${esc(it.name)}" />
+              <textarea class="item-desc" placeholder="Short description (optional)">${esc(it.description)}</textarea>
+              <label class="vis-wrap"><input type="checkbox" class="item-vis" ${it.visible ? 'checked' : ''}/></label>
+              <div class="arrows">
+                <button class="item-up" ${itemIdx === 0 ? 'disabled style="opacity:.4;cursor:default;"' : ''}>↑</button>
+                <button class="item-down" ${itemIdx === catItems.length - 1 ? 'disabled style="opacity:.4;cursor:default;"' : ''}>↓</button>
+              </div>
+              <button class="item-save">Save</button>
+              <button class="item-delete danger">×</button>
+            </div>
+          `).join('')}
+          <div class="add-item-row">
+            <input class="new-item-name" type="text" placeholder="New dish name" />
+            <input class="new-item-desc" type="text" placeholder="Description (optional)" />
+            <button class="item-add">+ Add</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    mount.innerHTML = html;
+    bind();
+  }
+
+  function bind() {
+    mount.querySelectorAll('.cat-card').forEach((card) => {
+      const catId = Number(card.getAttribute('data-cat-id'));
+      const nameInput = card.querySelector('.cat-head .name');
+      const visInput = card.querySelector('.cat-vis');
+
+      card.querySelector('.cat-save').addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        if (!name) { alert('Name required.'); return; }
+        const res = await fetch('/api/admin/menu/category?id=' + catId, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (!res.ok) alert('Save failed.');
+      });
+
+      visInput.addEventListener('change', async () => {
+        const res = await fetch('/api/admin/menu/category?id=' + catId, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visible: visInput.checked })
+        });
+        if (!res.ok) { visInput.checked = !visInput.checked; alert('Update failed.'); }
+      });
+
+      card.querySelector('.cat-delete').addEventListener('click', async () => {
+        if (!confirm('Delete this category? You must first remove all its items.')) return;
+        const res = await fetch('/api/admin/menu/category?id=' + catId, { method: 'DELETE' });
+        const out = await res.json().catch(() => ({}));
+        if (res.ok && out.ok) await load();
+        else alert(out.error || 'Delete failed.');
+      });
+
+      card.querySelector('.cat-up').addEventListener('click', async () => {
+        const idx = categories.findIndex((c) => c.id === catId);
+        if (idx <= 0) return;
+        await swapCategory(categories[idx], categories[idx - 1]);
+      });
+      card.querySelector('.cat-down').addEventListener('click', async () => {
+        const idx = categories.findIndex((c) => c.id === catId);
+        if (idx === -1 || idx >= categories.length - 1) return;
+        await swapCategory(categories[idx], categories[idx + 1]);
+      });
+
+      // Items inside this category
+      card.querySelectorAll('.item-row').forEach((row) => {
+        const itemId = Number(row.getAttribute('data-item-id'));
+        const itemName = row.querySelector('.item-name');
+        const itemDesc = row.querySelector('.item-desc');
+        const itemVis = row.querySelector('.item-vis');
+
+        row.querySelector('.item-save').addEventListener('click', async () => {
+          const name = itemName.value.trim();
+          if (!name) { alert('Name required.'); return; }
+          const res = await fetch('/api/admin/menu/item?id=' + itemId, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description: itemDesc.value })
+          });
+          if (!res.ok) alert('Save failed.');
+        });
+
+        itemVis.addEventListener('change', async () => {
+          const res = await fetch('/api/admin/menu/item?id=' + itemId, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visible: itemVis.checked })
+          });
+          if (!res.ok) { itemVis.checked = !itemVis.checked; alert('Update failed.'); }
+        });
+
+        row.querySelector('.item-delete').addEventListener('click', async () => {
+          if (!confirm('Delete this dish?')) return;
+          const res = await fetch('/api/admin/menu/item?id=' + itemId, { method: 'DELETE' });
+          if (res.ok) await load(); else alert('Delete failed.');
+        });
+
+        row.querySelector('.item-up').addEventListener('click', async () => {
+          const catItems = items.filter((x) => x.category_id === catId);
+          const idx = catItems.findIndex((x) => x.id === itemId);
+          if (idx <= 0) return;
+          await swapItem(catItems[idx], catItems[idx - 1]);
+        });
+        row.querySelector('.item-down').addEventListener('click', async () => {
+          const catItems = items.filter((x) => x.category_id === catId);
+          const idx = catItems.findIndex((x) => x.id === itemId);
+          if (idx === -1 || idx >= catItems.length - 1) return;
+          await swapItem(catItems[idx], catItems[idx + 1]);
+        });
+      });
+
+      // Add item
+      const addBtn = card.querySelector('.item-add');
+      const addName = card.querySelector('.new-item-name');
+      const addDesc = card.querySelector('.new-item-desc');
+      addBtn.addEventListener('click', async () => {
+        const name = addName.value.trim();
+        if (!name) { addName.focus(); return; }
+        const res = await fetch('/api/admin/menu/item', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category_id: catId, name, description: addDesc.value })
+        });
+        if (res.ok) {
+          addName.value = ''; addDesc.value = '';
+          await load();
+        } else alert('Add failed.');
+      });
+    });
+  }
+
+  async function swapCategory(a, b) {
+    await Promise.all([
+      fetch('/api/admin/menu/category?id=' + a.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: b.display_order })
+      }),
+      fetch('/api/admin/menu/category?id=' + b.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: a.display_order })
+      })
+    ]);
+    await load();
+  }
+
+  async function swapItem(a, b) {
+    await Promise.all([
+      fetch('/api/admin/menu/item?id=' + a.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: b.display_order })
+      }),
+      fetch('/api/admin/menu/item?id=' + b.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: a.display_order })
+      })
+    ]);
+    await load();
+  }
+
+  addCatBtn.addEventListener('click', async () => {
+    const name = newCatName.value.trim();
+    if (!name) { newCatName.focus(); return; }
+    const res = await fetch('/api/admin/menu/category', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    if (res.ok) {
+      newCatName.value = '';
+      await load();
+    } else alert('Add failed.');
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.href = '/admin/';
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

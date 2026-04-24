@@ -19,25 +19,31 @@ const json = (data, status = 200, extraHeaders = {}) =>
 
 export const onRequestGet = async ({ env }) => {
   if (!env.DB) {
-    // Site still works without a DB — just no edits.
-    return json({ settings: {}, content: {}, testimonials: [], gallery: [] });
+    return json({ settings: {}, content: {}, testimonials: [], gallery: [], menu: null });
   }
 
+  const safe = (p) => p.catch(() => ({ results: [] }));
+
   try {
-    const [settingsRes, contentRes, testimonialsRes, galleryRes] = await Promise.all([
+    const [settingsRes, contentRes, testimonialsRes, galleryRes, categoriesRes, itemsRes] = await Promise.all([
       env.DB.prepare(`SELECT key, value FROM settings`).all(),
       env.DB.prepare(`SELECT slot, value FROM content`).all(),
       env.DB.prepare(
         `SELECT id, quote, author FROM testimonials
-         WHERE visible = 1
-         ORDER BY display_order ASC, id ASC`
+         WHERE visible = 1 ORDER BY display_order ASC, id ASC`
       ).all(),
-      // Gallery may not exist if R2 isn't set up yet — wrap in try below
-      env.DB.prepare(
+      safe(env.DB.prepare(
         `SELECT id, ext, caption FROM gallery_images
-         WHERE visible = 1
-         ORDER BY display_order ASC, created_at DESC`
-      ).all().catch(() => ({ results: [] }))
+         WHERE visible = 1 ORDER BY display_order ASC, created_at DESC`
+      ).all()),
+      safe(env.DB.prepare(
+        `SELECT id, name FROM menu_categories
+         WHERE visible = 1 ORDER BY display_order ASC, id ASC`
+      ).all()),
+      safe(env.DB.prepare(
+        `SELECT id, category_id, name, description FROM menu_items
+         WHERE visible = 1 ORDER BY category_id ASC, display_order ASC, id ASC`
+      ).all())
     ]);
 
     const settings = {};
@@ -56,13 +62,28 @@ export const onRequestGet = async ({ env }) => {
       caption: r.caption || ''
     }));
 
+    // Build nested menu structure
+    const cats = categoriesRes.results || [];
+    const items = itemsRes.results || [];
+    let menu = null;
+    if (cats.length && items.length) {
+      const byCat = new Map();
+      for (const c of cats) byCat.set(c.id, { id: c.id, name: c.name, items: [] });
+      for (const it of items) {
+        const bucket = byCat.get(it.category_id);
+        if (bucket) bucket.items.push({ id: it.id, name: it.name, description: it.description });
+      }
+      menu = Array.from(byCat.values()).filter((c) => c.items.length);
+    }
+
     return json({
       settings,
       content,
       testimonials: testimonialsRes.results || [],
-      gallery
+      gallery,
+      menu
     });
   } catch (err) {
-    return json({ settings: {}, content: {}, testimonials: [], gallery: [] });
+    return json({ settings: {}, content: {}, testimonials: [], gallery: [], menu: null });
   }
 };
