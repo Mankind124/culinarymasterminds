@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Testimonials — Culinary Masterminds Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23b8736f'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' fill='%23fffaf3' text-anchor='middle'%3ECM%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+<style>
+  .testimonial-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    background: var(--cream);
+  }
+  .testimonial-row.editing { background: var(--ivory); border-color: var(--rose); }
+  .testimonial-row textarea {
+    width: 100%;
+    background: var(--ivory);
+    border: 1px solid var(--line);
+    padding: .75rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    border-radius: 2px;
+    min-height: 80px;
+    resize: vertical;
+  }
+  .testimonial-row input {
+    width: 100%;
+    background: var(--ivory);
+    border: 1px solid var(--line);
+    padding: .55rem .75rem;
+    font-family: var(--sans);
+    font-size: .9rem;
+    border-radius: 2px;
+    margin-top: .5rem;
+  }
+  .t-actions { display: flex; flex-direction: column; gap: .5rem; align-items: flex-end; }
+  .t-actions button {
+    background: var(--charcoal);
+    color: var(--ivory);
+    border: none;
+    padding: .4rem .9rem;
+    cursor: pointer;
+    font-size: .8rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .t-actions button:hover { background: var(--rose-deep); }
+  .t-actions button.danger:hover { background: #8b3a36; }
+  .t-actions label { font-size: .75rem; color: var(--muted); display: flex; align-items: center; gap: .35rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1>CM · Admin</h1>
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <a href="/" style="color:rgba(255,250,243,0.7); font-size:.85rem;">View site →</a>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <nav class="admin-nav">
+    <a href="/admin/dashboard.html">Bookings</a>
+    <a href="/admin/content.html">Content</a>
+    <a href="/admin/settings.html">Settings</a>
+    <a href="/admin/testimonials.html" class="active">Testimonials</a>
+  </nav>
+
+  <main class="admin-main">
+    <div class="admin-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1rem;">
+        <div>
+          <h2>Testimonials</h2>
+          <p style="color: var(--muted); margin: .25rem 0 0; font-size: .9rem;">The first <strong>visible</strong> testimonial appears on the home page.</p>
+        </div>
+        <button class="btn btn-primary" id="addBtn" style="padding: .65rem 1.25rem; font-size: .9rem;">+ Add testimonial</button>
+      </div>
+
+      <div id="addForm" style="display:none; margin-bottom: 1.5rem; padding: 1.25rem; background: var(--ivory); border: 2px solid var(--rose); border-radius: 4px;">
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.75rem; letter-spacing:.15em; text-transform:uppercase; color: var(--gold-deep); font-weight:600;">Quote</label>
+          <textarea id="newQuote" placeholder="What did the client say?" style="width:100%; margin-top:.4rem; min-height:80px; padding:.75rem; border:1px solid var(--line); border-radius:2px; font-family: var(--serif); font-style: italic; font-size: 1.05rem; line-height:1.5;"></textarea>
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.75rem; letter-spacing:.15em; text-transform:uppercase; color: var(--gold-deep); font-weight:600;">Author</label>
+          <input id="newAuthor" placeholder="e.g. Bola, Charlotte NC — June 2026 wedding" style="width:100%; margin-top:.4rem; padding:.55rem .75rem; border:1px solid var(--line); border-radius:2px;" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:.5rem;">
+          <button id="cancelAddBtn" style="background: transparent; border: 1px solid var(--line); padding: .55rem 1.25rem; cursor: pointer; border-radius: 2px;">Cancel</button>
+          <button class="btn btn-primary" id="saveAddBtn" style="padding: .55rem 1.25rem;">Add</button>
+        </div>
+      </div>
+
+      <div id="list">
+        <p class="empty-state">Loading...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  const list = document.getElementById('list');
+  const addBtn = document.getElementById('addBtn');
+  const addForm = document.getElementById('addForm');
+  const newQuote = document.getElementById('newQuote');
+  const newAuthor = document.getElementById('newAuthor');
+  const saveAddBtn = document.getElementById('saveAddBtn');
+  const cancelAddBtn = document.getElementById('cancelAddBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  let items = [];
+  const editing = new Set();
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function load() {
+    const res = await fetch('/api/admin/testimonials');
+    if (res.status === 401) { location.href = '/admin/'; return; }
+    const out = await res.json();
+    if (!out.ok) { list.innerHTML = '<p class="empty-state">Could not load testimonials.</p>'; return; }
+    items = out.items;
+    render();
+  }
+
+  function render() {
+    if (!items.length) { list.innerHTML = '<p class="empty-state">No testimonials yet. Add your first one above.</p>'; return; }
+    let html = '';
+    for (const t of items) {
+      const isEditing = editing.has(t.id);
+      html += `<div class="testimonial-row${isEditing ? ' editing' : ''}" data-id="${t.id}">
+        <div>
+          ${isEditing
+            ? `<textarea class="quote-input">${escapeHtml(t.quote)}</textarea>
+               <input class="author-input" value="${escapeHtml(t.author)}" />`
+            : `<div style="font-family: var(--serif); font-style: italic; font-size: 1.05rem; line-height: 1.5; color: var(--ink);">"${escapeHtml(t.quote)}"</div>
+               <div style="margin-top: .5rem; font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold-deep);">— ${escapeHtml(t.author)}</div>`}
+        </div>
+        <div class="t-actions">
+          <label><input type="checkbox" class="visible-toggle" ${t.visible ? 'checked' : ''}/> Visible</label>
+          ${isEditing
+            ? `<button class="save-btn">Save</button><button class="cancel-btn">Cancel</button>`
+            : `<button class="edit-btn">Edit</button><button class="delete-btn danger">Delete</button>`}
+        </div>
+      </div>`;
+    }
+    list.innerHTML = html;
+    bind();
+  }
+
+  function bind() {
+    list.querySelectorAll('.testimonial-row').forEach(row => {
+      const id = Number(row.getAttribute('data-id'));
+      const editBtn = row.querySelector('.edit-btn');
+      const saveBtn = row.querySelector('.save-btn');
+      const cancelBtn = row.querySelector('.cancel-btn');
+      const deleteBtn = row.querySelector('.delete-btn');
+      const visibleToggle = row.querySelector('.visible-toggle');
+
+      editBtn?.addEventListener('click', () => { editing.add(id); render(); });
+      cancelBtn?.addEventListener('click', () => { editing.delete(id); render(); });
+
+      saveBtn?.addEventListener('click', async () => {
+        const quote = row.querySelector('.quote-input').value.trim();
+        const author = row.querySelector('.author-input').value.trim();
+        if (!quote || !author) { alert('Quote and author are required.'); return; }
+        const res = await fetch('/api/admin/testimonials?id=' + id, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quote, author })
+        });
+        if (res.ok) { editing.delete(id); await load(); }
+        else alert('Save failed.');
+      });
+
+      deleteBtn?.addEventListener('click', async () => {
+        if (!confirm('Delete this testimonial?')) return;
+        const res = await fetch('/api/admin/testimonials?id=' + id, { method: 'DELETE' });
+        if (res.ok) await load(); else alert('Delete failed.');
+      });
+
+      visibleToggle?.addEventListener('change', async () => {
+        const res = await fetch('/api/admin/testimonials?id=' + id, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visible: visibleToggle.checked })
+        });
+        if (!res.ok) { visibleToggle.checked = !visibleToggle.checked; alert('Update failed.'); }
+        else await load();
+      });
+    });
+  }
+
+  addBtn.addEventListener('click', () => {
+    addForm.style.display = 'block';
+    newQuote.focus();
+  });
+  cancelAddBtn.addEventListener('click', () => {
+    addForm.style.display = 'none';
+    newQuote.value = ''; newAuthor.value = '';
+  });
+  saveAddBtn.addEventListener('click', async () => {
+    const quote = newQuote.value.trim();
+    const author = newAuthor.value.trim();
+    if (!quote || !author) { alert('Quote and author are required.'); return; }
+    saveAddBtn.disabled = true; saveAddBtn.textContent = 'Adding...';
+    const res = await fetch('/api/admin/testimonials', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quote, author, visible: true })
+    });
+    saveAddBtn.disabled = false; saveAddBtn.textContent = 'Add';
+    if (res.ok) {
+      newQuote.value = ''; newAuthor.value = '';
+      addForm.style.display = 'none';
+      await load();
+    } else alert('Add failed.');
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.href = '/admin/';
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

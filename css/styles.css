@@ -686,7 +686,104 @@ section { padding: clamp(4rem, 8vw, 7rem) 0; }
 }
 .admin-header button:hover { background: var(--rose-deep); border-color: var(--rose-deep); }
 
+.admin-nav {
+  background: var(--ink);
+  padding: 0 2rem;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255,250,243,0.1);
+}
+.admin-nav a {
+  color: rgba(255,250,243,0.7);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+  white-space: nowrap;
+}
+.admin-nav a:hover { color: var(--ivory); }
+.admin-nav a.active { color: var(--ivory); border-bottom-color: var(--rose); }
+
 .admin-main { padding: 2rem; flex: 1; }
+
+.admin-card .field-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.admin-card .field-row:last-child { border-bottom: none; }
+.admin-card .field-row label {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  font-weight: 600;
+  padding-top: 0.65rem;
+}
+.admin-card .field-row .field-help {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.admin-card .field-row input,
+.admin-card .field-row textarea,
+.admin-card .field-row select {
+  width: 100%;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  padding: 0.75rem 0.9rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--ink);
+  border-radius: 2px;
+}
+.admin-card .field-row textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+.admin-card .field-row input:focus,
+.admin-card .field-row textarea:focus {
+  outline: none;
+  border-color: var(--rose-deep);
+  background: var(--ivory);
+}
+@media (max-width: 720px) {
+  .admin-card .field-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .admin-card .field-row label { padding-top: 0; }
+}
+
+.admin-card .save-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--ivory);
+  border-top: 1px solid var(--line);
+  padding: 1rem 0 0;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-section-title {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--rose-deep);
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--rose-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+}
+.admin-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 .admin-card {
   background: var(--ivory);
   padding: 2rem;

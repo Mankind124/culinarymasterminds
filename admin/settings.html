@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings — Culinary Masterminds Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23b8736f'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' fill='%23fffaf3' text-anchor='middle'%3ECM%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1>CM · Admin</h1>
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <a href="/" style="color:rgba(255,250,243,0.7); font-size:.85rem;">View site →</a>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <nav class="admin-nav">
+    <a href="/admin/dashboard.html">Bookings</a>
+    <a href="/admin/content.html">Content</a>
+    <a href="/admin/settings.html" class="active">Settings</a>
+    <a href="/admin/testimonials.html">Testimonials</a>
+  </nav>
+
+  <main class="admin-main">
+    <div class="admin-card">
+      <h2>Business settings</h2>
+      <p style="color: var(--muted); margin: .5rem 0 1.5rem; font-size: .95rem;">Phone, email, social links, and other site-wide values. Changes go live within ~1 minute.</p>
+
+      <form id="form" novalidate>
+        <div id="fields">
+          <p class="empty-state">Loading...</p>
+        </div>
+
+        <div class="save-bar">
+          <span id="status" style="font-size: .9rem; color: var(--muted);"></span>
+          <button type="submit" class="btn btn-primary" id="saveBtn" style="padding: .65rem 1.5rem;">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  const fieldsEl = document.getElementById('fields');
+  const form = document.getElementById('form');
+  const status = document.getElementById('status');
+  const saveBtn = document.getElementById('saveBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function escapeAttr(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  let items = [];
+
+  async function load() {
+    const res = await fetch('/api/admin/settings');
+    if (res.status === 401) { location.href = '/admin/'; return; }
+    const out = await res.json();
+    if (!out.ok) { fieldsEl.innerHTML = '<p class="empty-state">Could not load settings.</p>'; return; }
+    items = out.items;
+    render();
+  }
+
+  function render() {
+    let html = '';
+    for (const it of items) {
+      const value = it.value || '';
+      const inputType = it.type === 'email' ? 'email' : it.type === 'url' ? 'url' : 'text';
+      html += `<div class="field-row">
+        <label for="f-${escapeAttr(it.key)}">${escapeAttr(it.label)}<div class="field-help">Default: ${escapeAttr(it.default || '(none)')}</div></label>
+        <input id="f-${escapeAttr(it.key)}" name="${escapeAttr(it.key)}" type="${inputType}" value="${escapeAttr(value)}" placeholder="${escapeAttr(it.default || '')}" />
+      </div>`;
+    }
+    fieldsEl.innerHTML = html;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    status.textContent = '';
+
+    const values = {};
+    for (const it of items) {
+      const el = document.getElementById('f-' + it.key);
+      values[it.key] = el ? el.value : '';
+    }
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values })
+      });
+      if (res.status === 401) { location.href = '/admin/'; return; }
+      const out = await res.json();
+      if (out.ok) {
+        status.textContent = 'Saved · live in ~1 min';
+        status.style.color = 'var(--sage-deep)';
+        await load();
+      } else {
+        status.textContent = out.error || 'Save failed';
+        status.style.color = '#8b3a36';
+      }
+    } catch {
+      status.textContent = 'Network error';
+      status.style.color = '#8b3a36';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save changes';
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.href = '/admin/';
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
