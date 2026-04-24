@@ -126,14 +126,14 @@
     <div class="admin-card">
       <h2>Gallery</h2>
       <p style="color: var(--muted); margin: .5rem 0 1.5rem; font-size: .95rem;">
-        Once you upload your first image, the public gallery switches from the seeded sample photos to your uploads.
-        JPEG, PNG, WebP, or AVIF. Max 8 MB per file. Resize before uploading for best performance.
+        Upload as many photos as you want — there's no limit. Your public <a href="/gallery.html" target="_blank" style="color: var(--rose-deep); text-decoration: underline;">gallery page</a> shows every visible image; the home page shows the first 4.
+        JPEG, PNG, WebP, or AVIF. Max 8 MB per file — resize to about 1600px wide before uploading for fastest loading.
       </p>
 
       <label class="uploader" id="dropzone">
         <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/avif" multiple />
         <p><strong>Click to choose files</strong> or drag &amp; drop here</p>
-        <p style="font-size:.8rem;">You can upload multiple images at once.</p>
+        <p style="font-size:.8rem;">Select or drop as many photos as you want — they'll upload one after another with a progress counter.</p>
       </label>
       <div id="progress" class="upload-progress" style="display:none;"></div>
 
@@ -169,7 +169,7 @@
 
   function render() {
     if (!items.length) {
-      grid.innerHTML = '<p class="empty-state">No images yet. Upload above to get started — until then the public site shows the 5 default sample photos.</p>';
+      grid.innerHTML = '<p class="empty-state">No images yet. Upload above — while your gallery is empty, the public site shows our 5 default sample photos as placeholders.</p>';
       return;
     }
     grid.innerHTML = items.map((it, idx) => `
