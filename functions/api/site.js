@@ -20,18 +20,24 @@ const json = (data, status = 200, extraHeaders = {}) =>
 export const onRequestGet = async ({ env }) => {
   if (!env.DB) {
     // Site still works without a DB — just no edits.
-    return json({ settings: {}, content: {}, testimonials: [] });
+    return json({ settings: {}, content: {}, testimonials: [], gallery: [] });
   }
 
   try {
-    const [settingsRes, contentRes, testimonialsRes] = await Promise.all([
+    const [settingsRes, contentRes, testimonialsRes, galleryRes] = await Promise.all([
       env.DB.prepare(`SELECT key, value FROM settings`).all(),
       env.DB.prepare(`SELECT slot, value FROM content`).all(),
       env.DB.prepare(
         `SELECT id, quote, author FROM testimonials
          WHERE visible = 1
          ORDER BY display_order ASC, id ASC`
-      ).all()
+      ).all(),
+      // Gallery may not exist if R2 isn't set up yet — wrap in try below
+      env.DB.prepare(
+        `SELECT id, ext, caption FROM gallery_images
+         WHERE visible = 1
+         ORDER BY display_order ASC, created_at DESC`
+      ).all().catch(() => ({ results: [] }))
     ]);
 
     const settings = {};
@@ -44,12 +50,19 @@ export const onRequestGet = async ({ env }) => {
       if (r.value && r.value.length) content[r.slot] = r.value;
     }
 
+    const gallery = (galleryRes.results || []).map((r) => ({
+      id: r.id,
+      url: `/img/${r.id}.${r.ext}`,
+      caption: r.caption || ''
+    }));
+
     return json({
       settings,
       content,
-      testimonials: testimonialsRes.results || []
+      testimonials: testimonialsRes.results || [],
+      gallery
     });
   } catch (err) {
-    return json({ settings: {}, content: {}, testimonials: [] });
+    return json({ settings: {}, content: {}, testimonials: [], gallery: [] });
   }
 };

@@ -54,3 +54,17 @@ SELECT
   'A Recent Wedding Client',
   0, 1, datetime('now')
 WHERE NOT EXISTS (SELECT 1 FROM testimonials);
+
+-- ── Gallery images (metadata; bytes live in R2) ───────────────────────────
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id            TEXT PRIMARY KEY,
+  ext           TEXT NOT NULL,
+  mime          TEXT NOT NULL,
+  size          INTEGER NOT NULL,
+  caption       TEXT NOT NULL DEFAULT '',
+  display_order INTEGER NOT NULL DEFAULT 0,
+  visible       INTEGER NOT NULL DEFAULT 1,
+  created_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_gallery_visible_order
+  ON gallery_images(visible DESC, display_order ASC, created_at DESC);

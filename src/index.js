@@ -10,6 +10,7 @@ import {
   onRequestOptions as bookingsOptions
 } from '../functions/api/bookings.js';
 import { onRequestGet as siteGet } from '../functions/api/site.js';
+import { onRequestGet as imgGet } from '../functions/api/img.js';
 
 import { onRequestPost as adminLoginPost } from '../functions/api/admin/login.js';
 import { onRequestPost as adminLogoutPost } from '../functions/api/admin/logout.js';
@@ -33,6 +34,12 @@ import {
   onRequestPatch as adminTestimonialsPatch,
   onRequestDelete as adminTestimonialsDelete
 } from '../functions/api/admin/testimonials.js';
+import {
+  onRequestGet as adminGalleryGet,
+  onRequestPost as adminGalleryPost,
+  onRequestPatch as adminGalleryPatch,
+  onRequestDelete as adminGalleryDelete
+} from '../functions/api/admin/gallery.js';
 
 const routes = [
   ['POST',    '/api/bookings',             bookingsPost],
@@ -57,6 +64,11 @@ const routes = [
   ['POST',    '/api/admin/testimonials',   adminTestimonialsPost],
   ['PATCH',   '/api/admin/testimonials',   adminTestimonialsPatch],
   ['DELETE',  '/api/admin/testimonials',   adminTestimonialsDelete],
+
+  ['GET',     '/api/admin/gallery',        adminGalleryGet],
+  ['POST',    '/api/admin/gallery',        adminGalleryPost],
+  ['PATCH',   '/api/admin/gallery',        adminGalleryPatch],
+  ['DELETE',  '/api/admin/gallery',        adminGalleryDelete],
 ];
 
 const json = (data, status = 200) =>
@@ -68,6 +80,15 @@ const json = (data, status = 200) =>
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // Public R2-backed image serving: /img/<id>.<ext>
+    if (request.method === 'GET' && url.pathname.startsWith('/img/')) {
+      try {
+        return await imgGet({ request, env });
+      } catch {
+        return new Response('Image error', { status: 500 });
+      }
+    }
 
     if (url.pathname.startsWith('/api/')) {
       for (const [method, path, handler] of routes) {

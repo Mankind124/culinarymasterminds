@@ -61,4 +61,45 @@
     if (q && t.quote) q.textContent = t.quote;
     if (a && t.author) a.textContent = '— ' + t.author;
   }
+
+  // Gallery — if admin has uploaded any images, replace the static grid
+  const galleryContainers = document.querySelectorAll('[data-cm-gallery]');
+  if (galleryContainers.length && Array.isArray(data.gallery) && data.gallery.length) {
+    galleryContainers.forEach((container) => {
+      const limit = Number(container.getAttribute('data-cm-gallery-limit')) || data.gallery.length;
+      const items = data.gallery.slice(0, limit);
+
+      const html = items.map((g) => {
+        const cap = (g.caption || '').replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+        const url = g.url.replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+        return `<a class="gallery-item" data-img="${url}"><img src="${url}" alt="${cap}" loading="lazy" /></a>`;
+      }).join('');
+
+      // Preserve any non-image children (like the "Follow us on Instagram" tile)
+      const preserved = container.querySelectorAll('[data-cm-gallery-preserve]');
+      container.innerHTML = html;
+      preserved.forEach((p) => container.appendChild(p));
+
+      // Re-bind lightbox click handlers (they're set up in main.js on initial load)
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      if (lightbox && lightboxImg) {
+        container.querySelectorAll('.gallery-item').forEach((item) => {
+          item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const src = item.getAttribute('data-img');
+            if (!src) return;
+            lightboxImg.src = src;
+            lightboxImg.alt = item.querySelector('img')?.alt || '';
+            lightbox.classList.add('open');
+            lightbox.setAttribute('aria-hidden', 'false');
+          });
+        });
+      }
+    });
+  }
 })();
