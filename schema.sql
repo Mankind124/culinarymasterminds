@@ -89,60 +89,38 @@ CREATE TABLE IF NOT EXISTS menu_items (
 CREATE INDEX IF NOT EXISTS idx_menu_items_cat_order
   ON menu_items(category_id, visible DESC, display_order ASC, id ASC);
 
--- Seed default categories (only if the table is empty)
-INSERT INTO menu_categories (id, name, display_order, visible)
-SELECT * FROM (
-  SELECT 1 AS id, 'Mains' AS name, 0 AS display_order, 1 AS visible
-  UNION ALL SELECT 2, 'Proteins', 1, 1
-  UNION ALL SELECT 3, 'Small Chops & Sides', 2, 1
-  UNION ALL SELECT 4, 'Drinks & Desserts', 3, 1
-)
-WHERE NOT EXISTS (SELECT 1 FROM menu_categories);
+-- Seed default categories. INSERT OR IGNORE is idempotent — safe to re-run.
+-- (D1 has a low compound-SELECT term limit, so we use VALUES multi-row syntax.)
+INSERT OR IGNORE INTO menu_categories (id, name, display_order, visible) VALUES
+  (1, 'Mains', 0, 1),
+  (2, 'Proteins', 1, 1),
+  (3, 'Small Chops & Sides', 2, 1),
+  (4, 'Drinks & Desserts', 3, 1);
 
--- Seed default menu items.
--- D1 limits terms in a compound SELECT, so we split the seed into one INSERT
--- per category. Each INSERT is guarded by "no items exist for this category",
--- so re-running is safe (it won't duplicate).
-
-INSERT INTO menu_items (category_id, name, description, display_order, visible)
-SELECT * FROM (
-  SELECT 1 AS category_id, 'Jollof Rice' AS name, 'The classic — smoky, tomato-rich, party-perfect.' AS description, 0 AS display_order, 1 AS visible
-  UNION ALL SELECT 1, 'Fried Rice', 'Nigerian-style fried rice with mixed vegetables and shrimp.', 1, 1
-  UNION ALL SELECT 1, 'Pounded Yam & Egusi', 'Smooth pounded yam paired with rich melon-seed soup.', 2, 1
-  UNION ALL SELECT 1, 'Amala & Ewedu', 'Yam flour with a savory leafy soup and assorted meats.', 3, 1
-  UNION ALL SELECT 1, 'Eba & Okra Soup', 'Cassava swallow with okra soup loaded with seafood and meats.', 4, 1
-  UNION ALL SELECT 1, 'Ofada Rice & Ayamase', 'Local rice with the iconic green pepper sauce.', 5, 1
-)
-WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE category_id = 1);
-
-INSERT INTO menu_items (category_id, name, description, display_order, visible)
-SELECT * FROM (
-  SELECT 2 AS category_id, 'Suya' AS name, 'Skewered, spiced grilled beef — bold and smoky.' AS description, 0 AS display_order, 1 AS visible
-  UNION ALL SELECT 2, 'Peppered Meat', 'Tender beef simmered in a vibrant pepper-onion stew.', 1, 1
-  UNION ALL SELECT 2, 'Asun', 'Spicy, smoky goat meat — a celebrated party favorite.', 2, 1
-  UNION ALL SELECT 2, 'Grilled Croaker / Tilapia', 'Whole fish marinated and grilled to order.', 3, 1
-  UNION ALL SELECT 2, 'Peppered Chicken', 'Marinated, grilled, and finished in our signature pepper sauce.', 4, 1
-  UNION ALL SELECT 2, 'Peppered Snail', 'A delicacy — tender snails in pepper sauce.', 5, 1
-)
-WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE category_id = 2);
-
-INSERT INTO menu_items (category_id, name, description, display_order, visible)
-SELECT * FROM (
-  SELECT 3 AS category_id, 'Puff Puff' AS name, 'Soft, golden, sweet fried dough — a crowd favorite.' AS description, 0 AS display_order, 1 AS visible
-  UNION ALL SELECT 3, 'Meat Pies', 'Flaky pastries filled with seasoned beef and vegetables.', 1, 1
-  UNION ALL SELECT 3, 'Spring Rolls & Samosas', 'Crispy parcels with savory fillings.', 2, 1
-  UNION ALL SELECT 3, 'Gizdodo', 'Spiced gizzards and plantain in pepper sauce.', 3, 1
-  UNION ALL SELECT 3, 'Moi Moi', 'Steamed bean pudding — soft, savory, and deeply flavored.', 4, 1
-  UNION ALL SELECT 3, 'Plantain (Dodo)', 'Sweet, ripe plantains pan-fried to golden perfection.', 5, 1
-)
-WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE category_id = 3);
-
-INSERT INTO menu_items (category_id, name, description, display_order, visible)
-SELECT * FROM (
-  SELECT 4 AS category_id, 'Chapman' AS name, 'Nigeria''s signature mocktail — refreshing and bright.' AS description, 0 AS display_order, 1 AS visible
-  UNION ALL SELECT 4, 'Zobo', 'Hibiscus drink, lightly sweetened and chilled.', 1, 1
-  UNION ALL SELECT 4, 'Tigernut Drink (Kunu Aya)', 'Creamy, naturally sweet, and refreshing.', 2, 1
-  UNION ALL SELECT 4, 'Chin Chin', 'Crunchy fried snack — perfect for grazing tables.', 3, 1
-  UNION ALL SELECT 4, 'Coconut Candy', 'Sweet, chewy treats made with fresh coconut.', 4, 1
-)
-WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE category_id = 4);
+-- Seed default menu items. Explicit IDs + INSERT OR IGNORE so re-runs are safe.
+-- If you delete an item via the admin UI, re-running this migration will re-create
+-- it (same ID re-used). That's fine for recovery; otherwise just don't re-run.
+INSERT OR IGNORE INTO menu_items (id, category_id, name, description, display_order, visible) VALUES
+  (1,  1, 'Jollof Rice',              'The classic — smoky, tomato-rich, party-perfect.',                            0, 1),
+  (2,  1, 'Fried Rice',                'Nigerian-style fried rice with mixed vegetables and shrimp.',                 1, 1),
+  (3,  1, 'Pounded Yam & Egusi',       'Smooth pounded yam paired with rich melon-seed soup.',                        2, 1),
+  (4,  1, 'Amala & Ewedu',             'Yam flour with a savory leafy soup and assorted meats.',                      3, 1),
+  (5,  1, 'Eba & Okra Soup',           'Cassava swallow with okra soup loaded with seafood and meats.',               4, 1),
+  (6,  1, 'Ofada Rice & Ayamase',      'Local rice with the iconic green pepper sauce.',                              5, 1),
+  (7,  2, 'Suya',                      'Skewered, spiced grilled beef — bold and smoky.',                             0, 1),
+  (8,  2, 'Peppered Meat',             'Tender beef simmered in a vibrant pepper-onion stew.',                        1, 1),
+  (9,  2, 'Asun',                      'Spicy, smoky goat meat — a celebrated party favorite.',                       2, 1),
+  (10, 2, 'Grilled Croaker / Tilapia', 'Whole fish marinated and grilled to order.',                                  3, 1),
+  (11, 2, 'Peppered Chicken',          'Marinated, grilled, and finished in our signature pepper sauce.',             4, 1),
+  (12, 2, 'Peppered Snail',            'A delicacy — tender snails in pepper sauce.',                                 5, 1),
+  (13, 3, 'Puff Puff',                 'Soft, golden, sweet fried dough — a crowd favorite.',                         0, 1),
+  (14, 3, 'Meat Pies',                 'Flaky pastries filled with seasoned beef and vegetables.',                    1, 1),
+  (15, 3, 'Spring Rolls & Samosas',    'Crispy parcels with savory fillings.',                                        2, 1),
+  (16, 3, 'Gizdodo',                   'Spiced gizzards and plantain in pepper sauce.',                               3, 1),
+  (17, 3, 'Moi Moi',                   'Steamed bean pudding — soft, savory, and deeply flavored.',                   4, 1),
+  (18, 3, 'Plantain (Dodo)',           'Sweet, ripe plantains pan-fried to golden perfection.',                       5, 1),
+  (19, 4, 'Chapman',                   'Nigeria''s signature mocktail — refreshing and bright.',                      0, 1),
+  (20, 4, 'Zobo',                      'Hibiscus drink, lightly sweetened and chilled.',                              1, 1),
+  (21, 4, 'Tigernut Drink (Kunu Aya)', 'Creamy, naturally sweet, and refreshing.',                                    2, 1),
+  (22, 4, 'Chin Chin',                 'Crunchy fried snack — perfect for grazing tables.',                           3, 1),
+  (23, 4, 'Coconut Candy',             'Sweet, chewy treats made with fresh coconut.',                                4, 1);
