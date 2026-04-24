@@ -1,0 +1,24 @@
+# Keep these out of the public asset bundle.
+# Cloudflare uploads everything in the project root as a static asset
+# unless listed here.
+
+src/
+functions/
+.git/
+.github/
+.claude/
+.vscode/
+.idea/
+.wrangler/
+
+wrangler.toml
+schema.sql
+README.md
+.gitignore
+.assetsignore
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+*.log
+node_modules/

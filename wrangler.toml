@@ -1,0 +1,18 @@
+# Cloudflare Workers + Static Assets config for Culinary Masterminds.
+#
+# Deploy is driven by the Cloudflare dashboard's Git integration:
+#   - It runs `npx wrangler deploy` on every push to main.
+#   - This file tells Wrangler to bundle src/index.js and serve everything else
+#     (HTML, CSS, JS, images) as static assets via the ASSETS binding.
+#
+# Bindings that are NOT in this file (D1 database, secrets) are configured
+# via the Cloudflare dashboard — Settings → Bindings & Settings → Variables.
+
+name = "culinarymasterminds"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./"
+binding = "ASSETS"
+not_found_handling = "404-page"

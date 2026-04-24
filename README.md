@@ -3,9 +3,9 @@
 Marketing site, booking form, and admin dashboard for **Culinary Masterminds** — a Nigerian catering company in Gastonia, NC serving Charlotte, Greensboro, and surrounding areas.
 
 - **Frontend**: hand-crafted HTML/CSS/JS — no build step
-- **Backend**: Cloudflare Pages Functions (Workers)
+- **Backend**: Cloudflare Worker (`src/index.js`) routing to handlers in `functions/api/`
 - **Database**: Cloudflare D1 (SQLite)
-- **Hosting**: Cloudflare Pages
+- **Hosting**: Cloudflare Workers + Static Assets (deploys from GitHub on push)
 
 ---
 
