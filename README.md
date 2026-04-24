@@ -125,7 +125,6 @@ wrangler login
 
 # 1. Create the database
 wrangler d1 create culinarymasterminds-db
-# Copy the database_id from the output and paste it into wrangler.toml
 
 # 2. Apply schema
 wrangler d1 execute culinarymasterminds-db --remote --file=./schema.sql
@@ -137,6 +136,11 @@ wrangler pages secret put SESSION_SECRET --project-name culinarymasterminds
 # 4. Deploy
 wrangler pages deploy . --project-name culinarymasterminds
 ```
+
+> **Note:** This repo intentionally has *no* `wrangler.toml` because newer Wrangler versions
+> auto-detect it as a Worker project and break the Pages deployment flow. All Pages bindings
+> (D1 database `DB`, secrets `ADMIN_PASSWORD` and `SESSION_SECRET`) are configured via the
+> Cloudflare dashboard under **Pages → Settings → Bindings / Variables and Secrets**.
 
 ---
 
