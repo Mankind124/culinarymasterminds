@@ -49,6 +49,7 @@ import {
   patchItem as adminMenuItemPatch,
   deleteItem as adminMenuItemDelete
 } from '../functions/api/admin/menu.js';
+import { onRequestPost as adminTestEmailPost } from '../functions/api/admin/test-email.js';
 
 const routes = [
   ['POST',    '/api/bookings',             bookingsPost],
@@ -86,6 +87,8 @@ const routes = [
   ['POST',    '/api/admin/menu/item',      adminMenuItemCreate],
   ['PATCH',   '/api/admin/menu/item',      adminMenuItemPatch],
   ['DELETE',  '/api/admin/menu/item',      adminMenuItemDelete],
+
+  ['POST',    '/api/admin/test-email',     adminTestEmailPost],
 ];
 
 const json = (data, status = 200) =>

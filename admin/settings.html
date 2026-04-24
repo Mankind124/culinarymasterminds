@@ -46,6 +46,13 @@
           <button type="submit" class="btn btn-primary" id="saveBtn" style="padding: .65rem 1.5rem;">Save changes</button>
         </div>
       </form>
+
+      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);">
+        <div class="admin-section-title">Email test</div>
+        <p style="color: var(--muted); font-size: .9rem; margin: .75rem 0 1rem;">Send a test email through Resend to diagnose any delivery issues. The result is shown below with the full API response.</p>
+        <button type="button" id="testEmailBtn" class="btn btn-primary" style="padding: .55rem 1.25rem; font-size: .9rem;">Send test email</button>
+        <pre id="testEmailResult" style="margin-top: 1rem; padding: 1rem; background: var(--ink); color: #e8f3e0; font-size: .8rem; border-radius: 4px; white-space: pre-wrap; word-break: break-all; display: none; max-height: 400px; overflow: auto;"></pre>
+      </div>
     </div>
   </main>
 </div>
@@ -135,6 +142,29 @@
   logoutBtn.addEventListener('click', async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
     location.href = '/admin/';
+  });
+
+  // Email test
+  const testEmailBtn = document.getElementById('testEmailBtn');
+  const testEmailResult = document.getElementById('testEmailResult');
+  testEmailBtn?.addEventListener('click', async () => {
+    testEmailBtn.disabled = true;
+    testEmailBtn.textContent = 'Sending...';
+    testEmailResult.style.display = 'block';
+    testEmailResult.style.color = '#e8f3e0';
+    testEmailResult.textContent = 'Sending test email...';
+    try {
+      const res = await fetch('/api/admin/test-email', { method: 'POST' });
+      const out = await res.json();
+      testEmailResult.textContent = JSON.stringify(out, null, 2);
+      testEmailResult.style.color = out.ok ? '#c5dfb6' : '#f5b8b3';
+    } catch (err) {
+      testEmailResult.textContent = 'Network error: ' + err.message;
+      testEmailResult.style.color = '#f5b8b3';
+    } finally {
+      testEmailBtn.disabled = false;
+      testEmailBtn.textContent = 'Send test email';
+    }
   });
 
   load();
