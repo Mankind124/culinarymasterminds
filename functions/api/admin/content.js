@@ -96,6 +96,11 @@ export const onRequestGet = async ({ request, env }) => {
   return json({ ok: true, items });
 };
 
+// Sentinel value stored in DB when the admin clicks "Clear & hide" — must match
+// the constant in admin/content.html. Returned to the public API as-is so the
+// frontend can blank the element on the live site.
+export const HIDE_SENTINEL = '__cm_hide__';
+
 export const onRequestPut = async ({ request, env }) => {
   const fail = await ensureAuth(request, env); if (fail) return fail;
 
@@ -106,18 +111,32 @@ export const onRequestPut = async ({ request, env }) => {
   const values = (body && typeof body.values === 'object' && body.values) || {};
   const now = new Date().toISOString();
 
+  // Three save outcomes per slot:
+  //   1. Empty string  → admin reverted to default → DELETE the row so the
+  //                      public site falls back to the hardcoded default.
+  //   2. HIDE_SENTINEL → admin cleared the field   → store sentinel so the
+  //                      public site blanks the element.
+  //   3. Other text    → store as custom value.
   const stmts = [];
+  let updated = 0;
   for (const [slot, raw] of Object.entries(values)) {
     if (!VALID_SLOTS.has(slot)) continue;
-    const value = (typeof raw === 'string' ? raw : '').trim().slice(0, 4000);
-    stmts.push(
-      env.DB.prepare(
-        `INSERT INTO content (slot, value, updated_at) VALUES (?, ?, ?)
-         ON CONFLICT(slot) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
-      ).bind(slot, value, now)
-    );
+    if (typeof raw !== 'string') continue;
+    const trimmed = raw.slice(0, 4000);
+
+    if (trimmed === '') {
+      stmts.push(env.DB.prepare(`DELETE FROM content WHERE slot = ?`).bind(slot));
+    } else {
+      stmts.push(
+        env.DB.prepare(
+          `INSERT INTO content (slot, value, updated_at) VALUES (?, ?, ?)
+           ON CONFLICT(slot) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+        ).bind(slot, trimmed, now)
+      );
+    }
+    updated++;
   }
   if (stmts.length) await env.DB.batch(stmts);
 
-  return json({ ok: true, updated: stmts.length });
+  return json({ ok: true, updated });
 };

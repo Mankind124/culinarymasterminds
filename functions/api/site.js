@@ -51,9 +51,12 @@ export const onRequestGet = async ({ env }) => {
       if (r.value && r.value.length) settings[r.key] = r.value;
     }
 
+    // Include every saved slot (even ones explicitly hidden via the admin's
+    // "Clear & hide" button — those carry the sentinel value '__cm_hide__'
+    // which the public frontend translates to an empty string).
     const content = {};
     for (const r of (contentRes.results || [])) {
-      if (r.value && r.value.length) content[r.slot] = r.value;
+      if (typeof r.value === 'string' && r.value.length) content[r.slot] = r.value;
     }
 
     const gallery = (galleryRes.results || []).map((r) => ({

@@ -25,16 +25,25 @@
 
   const all = Object.assign({}, data.settings || {}, data.content || {});
 
-  const get = (key) => (key && Object.prototype.hasOwnProperty.call(all, key)) ? all[key] : null;
+  // Sentinel the admin "Clear & hide" button writes to the DB. Translate it
+  // back to an empty string here so the public element is blanked out.
+  const HIDE_SENTINEL = '__cm_hide__';
+
+  const get = (key) => {
+    if (!key || !Object.prototype.hasOwnProperty.call(all, key)) return null;
+    const v = all[key];
+    if (v === HIDE_SENTINEL) return '';
+    return v;
+  };
 
   document.querySelectorAll('[data-cm]').forEach((el) => {
     const v = get(el.getAttribute('data-cm'));
-    if (v != null && v !== '') el.textContent = v;
+    if (v != null) el.textContent = v;
   });
 
   document.querySelectorAll('[data-cm-html]').forEach((el) => {
     const v = get(el.getAttribute('data-cm-html'));
-    if (v != null && v !== '') el.innerHTML = v;
+    if (v != null) el.innerHTML = v;
   });
 
   document.querySelectorAll('[data-cm-href]').forEach((el) => {

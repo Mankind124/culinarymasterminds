@@ -34,7 +34,12 @@
   <main class="admin-main">
     <div class="admin-card">
       <h2>Page text</h2>
-      <p style="color: var(--muted); margin: .5rem 0 1.5rem; font-size: .95rem;">Edit the headlines and copy on each page. Leaving a field blank reverts to the default text. Changes go live within ~1 minute.</p>
+      <p style="color: var(--muted); margin: .5rem 0 .5rem; font-size: .95rem;">Edit any field directly — the current text is already filled in. Use <strong>Clear</strong> to remove a section from the live site, or <strong>Reset</strong> to restore the original default. Changes go live within ~1 minute.</p>
+      <div style="margin: 0 0 1.5rem; font-size: .8rem; color: var(--muted); display:flex; gap:1rem; flex-wrap:wrap;">
+        <span><span class="state-pill state-default"></span> Original default</span>
+        <span><span class="state-pill state-custom"></span> Custom text</span>
+        <span><span class="state-pill state-hidden"></span> Hidden on site</span>
+      </div>
 
       <form id="form" novalidate>
         <div id="fields">
@@ -50,6 +55,33 @@
   </main>
 </div>
 
+<style>
+  .state-pill { display:inline-block; width:.7rem; height:.7rem; border-radius:50%; vertical-align:middle; margin-right:.35rem; border:1px solid transparent; }
+  .state-pill.state-default { background: var(--cream); border-color: var(--line); }
+  .state-pill.state-custom  { background: var(--rose-deep); }
+  .state-pill.state-hidden  { background: transparent; border:1px dashed #8b3a36; }
+  .field-row .field-state { font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color: var(--muted); margin-top:.4rem; display:inline-flex; align-items:center; }
+  .field-row .field-actions { display:flex; gap:.5rem; margin-top:.5rem; flex-wrap:wrap; }
+  .field-row .field-actions button {
+    background: transparent;
+    color: var(--rose-deep);
+    border: 1px solid var(--rose-soft);
+    padding: .35rem .75rem;
+    font-size: .75rem;
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-family: var(--sans);
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .field-row .field-actions button:hover { background: var(--rose-deep); color: var(--ivory); border-color: var(--rose-deep); }
+  .field-row .field-actions button.danger { color: #8b3a36; border-color: #e8c8c5; }
+  .field-row .field-actions button.danger:hover { background: #8b3a36; color: var(--ivory); border-color: #8b3a36; }
+  .admin-card .field-row textarea.long { min-height: 140px; }
+  .admin-card .field-row textarea.xlong { min-height: 200px; }
+</style>
+
 <script>
 (function () {
   const fieldsEl = document.getElementById('fields');
@@ -57,6 +89,10 @@
   const status = document.getElementById('status');
   const saveBtn = document.getElementById('saveBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+
+  // The server uses a sentinel value to distinguish "explicitly cleared / hide on site"
+  // from "not yet customized." Mirrors HIDE_SENTINEL in functions/api/admin/content.js.
+  const HIDE_SENTINEL = '__cm_hide__';
 
   function escapeAttr(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -73,6 +109,28 @@
     render();
   }
 
+  // What text should the textarea start with?
+  //   - No saved value (never edited)           → start with the default (so user can edit it)
+  //   - Saved with the hide sentinel            → start blank
+  //   - Saved with custom text                  → start with that custom text
+  function effectiveInitial(it) {
+    if (it.value === HIDE_SENTINEL) return '';
+    if (it.value && it.value.length) return it.value;
+    return it.default || '';
+  }
+
+  function fieldState(it) {
+    if (it.value === HIDE_SENTINEL) return 'hidden';
+    if (it.value && it.value.length && it.value !== it.default) return 'custom';
+    return 'default';
+  }
+
+  function stateLabel(state) {
+    if (state === 'hidden') return '<span class="state-pill state-hidden"></span> Hidden on live site';
+    if (state === 'custom') return '<span class="state-pill state-custom"></span> Custom text';
+    return '<span class="state-pill state-default"></span> Showing default';
+  }
+
   function render() {
     let html = '';
     let lastPage = '';
@@ -81,21 +139,80 @@
         html += `<div class="admin-section-title">${escapeAttr(it.page)}</div>`;
         lastPage = it.page;
       }
-      const value = it.value || '';
-      const placeholder = it.default || '';
+      const initial = effectiveInitial(it);
       const useTextarea = it.type === 'textarea' || (it.default && it.default.length > 80);
+      const longClass = useTextarea && it.default
+        ? (it.default.length > 220 ? ' xlong' : (it.default.length > 120 ? ' long' : ''))
+        : '';
       const helpText = it.type === 'html'
         ? 'You can use simple HTML like &lt;em&gt;italic&lt;/em&gt; or &lt;strong&gt;bold&lt;/strong&gt;.'
-        : 'Default: ' + (it.default || '(none)').slice(0, 100) + (it.default && it.default.length > 100 ? '…' : '');
+        : 'Edit directly. Clear to hide the text on the site. Reset to restore the original wording.';
       const input = useTextarea
-        ? `<textarea id="f-${escapeAttr(it.slot)}" name="${escapeAttr(it.slot)}" placeholder="${escapeAttr(placeholder)}">${escapeAttr(value)}</textarea>`
-        : `<input id="f-${escapeAttr(it.slot)}" name="${escapeAttr(it.slot)}" type="text" value="${escapeAttr(value)}" placeholder="${escapeAttr(placeholder)}" />`;
-      html += `<div class="field-row">
+        ? `<textarea id="f-${escapeAttr(it.slot)}" class="cm-field${longClass}" name="${escapeAttr(it.slot)}">${escapeAttr(initial)}</textarea>`
+        : `<input id="f-${escapeAttr(it.slot)}" class="cm-field" name="${escapeAttr(it.slot)}" type="text" value="${escapeAttr(initial)}" />`;
+
+      const state = fieldState(it);
+      html += `<div class="field-row" data-slot="${escapeAttr(it.slot)}">
         <label for="f-${escapeAttr(it.slot)}">${escapeAttr(it.label)}<div class="field-help">${helpText}</div></label>
-        <div>${input}</div>
+        <div>
+          ${input}
+          <div class="field-state" data-state-label>${stateLabel(state)}</div>
+          <div class="field-actions">
+            <button type="button" class="reset-btn" title="Restore the original default wording">Reset to default</button>
+            <button type="button" class="danger clear-btn" title="Hide this text on the live site">Clear &amp; hide</button>
+          </div>
+        </div>
       </div>`;
     }
     fieldsEl.innerHTML = html;
+    bindFieldButtons();
+  }
+
+  function bindFieldButtons() {
+    fieldsEl.querySelectorAll('.field-row').forEach((row) => {
+      const slot = row.getAttribute('data-slot');
+      const it = items.find(i => i.slot === slot);
+      if (!it) return;
+      const field = row.querySelector('.cm-field');
+      const stateLabelEl = row.querySelector('[data-state-label]');
+
+      const refreshState = () => {
+        let state = 'default';
+        if (field.value === '') state = 'hidden';
+        else if (field.value !== it.default) state = 'custom';
+        stateLabelEl.innerHTML = stateLabel(state);
+      };
+
+      field.addEventListener('input', refreshState);
+
+      row.querySelector('.reset-btn').addEventListener('click', () => {
+        field.value = it.default || '';
+        field.focus();
+        refreshState();
+      });
+      row.querySelector('.clear-btn').addEventListener('click', () => {
+        field.value = '';
+        field.focus();
+        refreshState();
+      });
+    });
+  }
+
+  // Decide what to send for each slot based on what's in the textarea now.
+  //   - Empty                               → server stores HIDE_SENTINEL → site shows nothing
+  //   - Matches the default exactly         → server deletes the row     → site uses hardcoded default
+  //   - Anything else                       → server stores the custom text
+  function buildPayload() {
+    const out = {};
+    for (const it of items) {
+      const el = document.getElementById('f-' + it.slot);
+      if (!el) continue;
+      const v = el.value;
+      if (v === '') out[it.slot] = HIDE_SENTINEL;
+      else if (v === (it.default || '')) out[it.slot] = '';   // empty string = "revert to default" on server
+      else out[it.slot] = v;
+    }
+    return out;
   }
 
   form.addEventListener('submit', async (e) => {
@@ -104,16 +221,11 @@
     saveBtn.textContent = 'Saving...';
     status.textContent = '';
 
-    const values = {};
-    for (const it of items) {
-      const el = document.getElementById('f-' + it.slot);
-      values[it.slot] = el ? el.value : '';
-    }
     try {
       const res = await fetch('/api/admin/content', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values })
+        body: JSON.stringify({ values: buildPayload() })
       });
       if (res.status === 401) { location.href = '/admin/'; return; }
       const out = await res.json();
