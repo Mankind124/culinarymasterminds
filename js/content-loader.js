@@ -52,14 +52,73 @@
     if (v) el.setAttribute('href', 'mailto:' + v);
   });
 
-  // Testimonials — replaces the first visible one
+  // Testimonials — one testimonial: swap text in place.
+  // Multiple testimonials: build an auto-rotating carousel with dot indicators.
   const tContainer = document.querySelector('[data-cm-testimonials]');
   if (tContainer && Array.isArray(data.testimonials) && data.testimonials.length) {
-    const t = data.testimonials[0];
-    const q = tContainer.querySelector('[data-cm-testimonial-quote]');
-    const a = tContainer.querySelector('[data-cm-testimonial-author]');
-    if (q && t.quote) q.textContent = t.quote;
-    if (a && t.author) a.textContent = '— ' + t.author;
+    if (data.testimonials.length === 1) {
+      const t = data.testimonials[0];
+      const q = tContainer.querySelector('[data-cm-testimonial-quote]');
+      const a = tContainer.querySelector('[data-cm-testimonial-author]');
+      if (q && t.quote) q.textContent = t.quote;
+      if (a && t.author) a.textContent = '— ' + t.author;
+    } else {
+      const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+
+      const slides = data.testimonials.map((t, i) => `
+        <div class="testimonial-slide${i === 0 ? ' active' : ''}" data-slide="${i}">
+          <p class="testimonial-quote">${esc(t.quote || '')}</p>
+          <div class="testimonial-author">— ${esc(t.author || '')}</div>
+        </div>
+      `).join('');
+
+      const dots = data.testimonials.map((_, i) =>
+        `<button class="testimonial-dot${i === 0 ? ' active' : ''}" data-dot="${i}" type="button" aria-label="Show testimonial ${i + 1}"></button>`
+      ).join('');
+
+      const eyebrowEl = tContainer.querySelector('.eyebrow');
+      const eyebrowHtml = eyebrowEl ? eyebrowEl.outerHTML : '<span class="eyebrow">Kind words</span>';
+
+      tContainer.innerHTML = `
+        ${eyebrowHtml}
+        <div class="testimonial-stage" aria-live="polite">${slides}</div>
+        <div class="testimonial-dots" role="tablist">${dots}</div>
+      `;
+
+      const slideEls = tContainer.querySelectorAll('.testimonial-slide');
+      const dotEls = tContainer.querySelectorAll('.testimonial-dot');
+      let current = 0;
+      let timer = null;
+      const INTERVAL = 7000;
+
+      const goTo = (idx) => {
+        const next = ((idx % slideEls.length) + slideEls.length) % slideEls.length;
+        slideEls[current].classList.remove('active');
+        dotEls[current].classList.remove('active');
+        slideEls[next].classList.add('active');
+        dotEls[next].classList.add('active');
+        current = next;
+      };
+
+      const start = () => { if (!timer) timer = setInterval(() => goTo(current + 1), INTERVAL); };
+      const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        start();
+        tContainer.addEventListener('mouseenter', stop);
+        tContainer.addEventListener('mouseleave', start);
+      }
+
+      dotEls.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          goTo(i);
+          if (!reduce) { stop(); start(); }
+        });
+      });
+    }
   }
 
   // Promo banner — show only if admin toggled it on AND has text
