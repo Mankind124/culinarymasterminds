@@ -12,6 +12,12 @@
 <link rel="stylesheet" href="/css/styles.css" />
 <style>
   .page-hero .hero-bg { background-image: linear-gradient(135deg, rgba(26,22,20,0.7) 0%, rgba(184,115,111,0.45) 100%), url('/images/pic2.jpeg'); background-size: cover; background-position: center; }
+  .split.split-reverse .split-image { order: 2; }
+  .split.split-reverse .split-text { order: 1; }
+  @media (max-width: 880px) {
+    .split.split-reverse .split-image { order: 1; }
+    .split.split-reverse .split-text { order: 2; }
+  }
 </style>
 </head>
 <body>
@@ -30,6 +36,7 @@
       <li><a href="/about.html" class="active">About</a></li>
       <li><a href="/services.html">Services</a></li>
       <li><a href="/gallery.html">Gallery</a></li>
+      <li><a href="/faq.html">FAQs</a></li>
       <li><a href="/contact.html">Contact</a></li>
       <li><a href="/contact.html#book" class="nav-cta">Book Now</a></li>
     </ul>
@@ -57,6 +64,25 @@
         <p data-cm="about.body_1">We are a licensed and insured catering company based in Gastonia, North Carolina, specializing in rich, flavorful dishes inspired by authentic Nigerian cuisine.</p>
         <p data-cm-html="about.body_2">Every event we cater is shaped by three commitments: <strong>exceptional taste</strong>, <strong>stunning presentation</strong>, and <strong>seamless service</strong>. Whether you're hosting an intimate gathering or a grand celebration, every dish is thoughtfully prepared to reflect culture and creativity.</p>
         <p data-cm="about.body_3">Because your special moments deserve nothing less.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--cream);">
+  <div class="container">
+    <div class="split split-reverse">
+      <div class="split-image reveal">
+        <img src="/images/chef-tamilore.jpeg" alt="Tamilore, Head Chef and founder of Culinary Masterminds" />
+      </div>
+      <div class="split-text reveal">
+        <span class="section-label">Meet the chef</span>
+        <h2 data-cm="about.chef_title">Hello!</h2>
+        <p data-cm="about.chef_p1">I'm Tamilore, the creative force behind Culinary Masterminds — a brand born from passion, precision, and a deep love for creating memorable food experiences.</p>
+        <p data-cm="about.chef_p2">By day, I'm an Engineer, dedicated to improving processes and systems, making them more efficient. That same attention to detail, structure, and excellence naturally flows into my work in the kitchen.</p>
+        <p data-cm="about.chef_p3">My love for cooking was nurtured from a young age, inspired by my mother, a caterer, whose dedication and passion for creating memorable meals left a lasting impression on me.</p>
+        <p data-cm="about.chef_p4">Outside of my professional career, I find joy in crafting delicious, beautifully presented meals that bring people together. What started as a passion has grown into a full-service catering experience focused on quality, creativity, and exceptional service.</p>
+        <p data-cm="about.chef_p5">At Culinary Masterminds, we believe that food is more than just a meal — it's an experience. From intimate gatherings to grand celebrations, every dish is thoughtfully prepared to reflect your vision and elevate your event.</p>
       </div>
     </div>
   </div>
@@ -130,7 +156,7 @@
           <a data-cm-tel="business_phone" href="tel:+13363384912" aria-label="Phone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 10.05a16 16 0 0 0 6 6l1.41-1.41a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg></a>
         </div>
       </div>
-      <div><h4>Visit</h4><ul><li><a href="/">Home</a></li><li><a href="/about.html">About</a></li><li><a href="/services.html">Services</a></li><li><a href="/gallery.html">Gallery</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
+      <div><h4>Visit</h4><ul><li><a href="/">Home</a></li><li><a href="/about.html">About</a></li><li><a href="/services.html">Services</a></li><li><a href="/gallery.html">Gallery</a></li><li><a href="/faq.html">FAQs</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
       <div><h4>Service Area</h4><ul><li>Gastonia, NC</li><li>Charlotte</li><li>Greensboro</li><li>& surrounding areas</li></ul></div>
       <div><h4>Contact</h4><ul><li><a data-cm-mailto="business_email" data-cm="business_email" href="mailto:culinarymasterminds@gmail.com">culinarymasterminds@gmail.com</a></li><li><a data-cm-tel="business_phone" data-cm="business_phone" href="tel:+13363384912">(336) 338‑4912</a></li><li><a data-cm-href="business_instagram_url" data-cm="business_instagram_handle" href="https://www.instagram.com/culinarymasterminds" target="_blank" rel="noopener">@culinarymasterminds</a></li></ul></div>
     </div>

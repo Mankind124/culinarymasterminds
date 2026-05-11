@@ -45,6 +45,18 @@ export const CONTENT_SCHEMA = [
     default: "Every event we cater is shaped by three commitments: exceptional taste, stunning presentation, and seamless service. Whether you're hosting an intimate gathering or a grand celebration, every dish is thoughtfully prepared to reflect culture and creativity." },
   { slot: 'about.body_3',         page: 'About',  label: 'Story — paragraph 3',              type: 'textarea',
     default: 'Because your special moments deserve nothing less.' },
+  { slot: 'about.chef_title',     page: 'About',  label: 'Chef — greeting heading',          type: 'text',
+    default: 'Hello!' },
+  { slot: 'about.chef_p1',        page: 'About',  label: 'Chef — paragraph 1 (intro)',       type: 'textarea',
+    default: "I'm Tamilore, the creative force behind Culinary Masterminds — a brand born from passion, precision, and a deep love for creating memorable food experiences." },
+  { slot: 'about.chef_p2',        page: 'About',  label: 'Chef — paragraph 2 (engineer)',    type: 'textarea',
+    default: "By day, I'm an Engineer, dedicated to improving processes and systems, making them more efficient. That same attention to detail, structure, and excellence naturally flows into my work in the kitchen." },
+  { slot: 'about.chef_p3',        page: 'About',  label: 'Chef — paragraph 3 (mother)',      type: 'textarea',
+    default: 'My love for cooking was nurtured from a young age, inspired by my mother, a caterer, whose dedication and passion for creating memorable meals left a lasting impression on me.' },
+  { slot: 'about.chef_p4',        page: 'About',  label: 'Chef — paragraph 4 (passion)',     type: 'textarea',
+    default: 'Outside of my professional career, I find joy in crafting delicious, beautifully presented meals that bring people together. What started as a passion has grown into a full-service catering experience focused on quality, creativity, and exceptional service.' },
+  { slot: 'about.chef_p5',        page: 'About',  label: 'Chef — paragraph 5 (closing)',     type: 'textarea',
+    default: "At Culinary Masterminds, we believe that food is more than just a meal — it's an experience. From intimate gatherings to grand celebrations, every dish is thoughtfully prepared to reflect your vision and elevate your event." },
 
   // Services
   { slot: 'services.hero_title',    page: 'Services', label: 'Hero headline',                type: 'text',
@@ -63,6 +75,8 @@ export const CONTENT_SCHEMA = [
     default: "Let's plan your event" },
   { slot: 'contact.hero_subtitle', page: 'Contact',  label: 'Hero subtitle',                 type: 'textarea',
     default: "Tell us about your occasion and we'll be in touch within 24 hours." },
+  { slot: 'contact.book_intro',    page: 'Contact',  label: 'Booking form — intro paragraph (above the form)', type: 'textarea',
+    default: "Share a few details about your event below and we'll get back to you within 24 hours with a personalized menu and quote. A 20% non-refundable retainer secures your date once details are confirmed." },
 ];
 
 const VALID_SLOTS = new Set(CONTENT_SCHEMA.map((s) => s.slot));

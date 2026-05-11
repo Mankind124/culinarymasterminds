@@ -127,7 +127,7 @@
     <div class="admin-card">
       <h2>Gallery</h2>
       <p style="color: var(--muted); margin: .5rem 0 1.5rem; font-size: .95rem;">
-        Upload as many photos as you want — there's no limit. Your public <a href="/gallery.html" target="_blank" style="color: var(--rose-deep); text-decoration: underline;">gallery page</a> shows every visible image; the home page shows the first 4.
+        Upload as many photos as you want — there's no limit. Your uploads stay until you delete them here. Your public <a href="/gallery.html" target="_blank" style="color: var(--rose-deep); text-decoration: underline;">gallery page</a> shows every visible image you've uploaded, followed by the 5 sample placeholder photos. The home page shows the first 4 of your uploads (placeholders only appear if you haven't uploaded anything yet).
         JPEG, PNG, WebP, or AVIF. Max 8 MB per file — resize to about 1600px wide before uploading for fastest loading.
       </p>
 
@@ -170,7 +170,7 @@
 
   function render() {
     if (!items.length) {
-      grid.innerHTML = '<p class="empty-state">No images yet. Upload above — while your gallery is empty, the public site shows our 5 default sample photos as placeholders.</p>';
+      grid.innerHTML = '<p class="empty-state">No uploads yet. Upload above — your photos will appear on the public gallery alongside the 5 default sample placeholders.</p>';
       return;
     }
     grid.innerHTML = items.map((it, idx) => `
